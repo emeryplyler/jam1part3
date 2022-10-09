@@ -10,6 +10,13 @@ c cc c
 cccccc
 cccccc
 cccccc
+`,
+`
+p p
+ p 
+ppp
+pyp
+ p 
 `
 ];
 
@@ -52,6 +59,7 @@ options = {
  * pos: Vector,
  * speed: number,
  * isJumping: boolean,
+ * vx: number,
  * vy: number,
  * }} Player
  */
@@ -59,20 +67,47 @@ options = {
 /**
  * @type { Player }
  */
- let player;
+let player;
 
+/**
+ * @typedef {{
+ * pos: Vector,
+ * }} Fish
+ */
+
+/**
+ * @type { Fish }
+ */
+let fish;
+
+/**
+ * @type { Fish [] }
+ */
+let fishes;
+
+/**
+ * @type { number }
+ */
+const fishspeed = 0.2;
 
 function update() {
 	if (!ticks) {
+		// initialization
 		player = {
             pos: vec(G.WIDTH * 0.5, G.HEIGHT * 0.5),
 			speed: 0,
 			isJumping: false,
+			vx: 0,
 			vy: 0,
             // firingCooldown: G.PLAYER_FIRE_RATE,
             // isFiringLeft: true
         };
+		fish = {
+			pos: vec(G.WIDTH * 0.5, 0),
+		};
+		fishes = [];
 	}
+
 	if (player.isJumping) {
 		player.vy += 0.05;            // decrease upward velocity
 		player.pos.y += player.vy;    // move sprite
@@ -85,11 +120,59 @@ function update() {
 		if (input.isJustPressed) {
 			player.vy = -1;           // initial upward velocity
 			player.isJumping = true;
+			// addScore(1);
 		}
+	}
+
+	// move player back and forth x
+
+	// for (let i = 0; i < fishes.length; i++) {
+	// 	let thisFish = char("b", fishes[i].pos);     // draw fish
+	// 	fishes[i].pos.y += fishspeed; // move fish down
+		
+	// 	if (fishes[i].pos.y >= G.HEIGHT) {
+	// 		end("Game over :(");      // fish dropped
+	// 	}
+
+	// 	// if fish collides with player and player is jumping,
+	// 	const fishCollision = thisFish.isColliding.char.a;
+	// 	if (fishCollision) {
+	// 		addScore(1);
+	// 		remove(thisFish, );
+	// 	}
+	// 	// raise score and delete fish
+	// 	// remove()
+	// }
+
+	
+
+	if (fishes.length < 2) {
+		const posX = player.pos.x;
+		const posY = rnd(0, 20);
+		fishes.push({ pos: vec(posX, posY) });
 	}
 	
 	// player.pos = vec(input.pos.x, input.pos.y);
 	player.pos.clamp(0, G.WIDTH, 0, G.HEIGHT);
 	char("a", player.pos);
+
+
+	remove(fishes, (f) => {
+		// let thisFish = char("b", f.pos);    // draw fish
+		f.pos.y += fishspeed;               // move fish down
+		
+		if (f.pos.y >= G.HEIGHT) {
+			end("Game over :("); // fish dropped
+		}
+
+		// if fish collides with player and player is jumping, todo
+		const fishCollision = char("b", f.pos).isColliding.char.a;
+		if (fishCollision && player.isJumping) {
+			addScore(1); // add to score
+			return true; // delete fish
+		} else {
+			return false;
+		}
+	});
 }
 
