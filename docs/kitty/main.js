@@ -172,7 +172,7 @@ function update() {
 		// let thisFish = char("b", f.pos);    // draw fish
 		f.pos.x -= fishspeed;               // move fish 
 		
-		if (f.pos.x >= G.WIDTH) {
+		if (f.pos.x <= 0) {
 			end("Game over :("); // fish escape
 		}
 
