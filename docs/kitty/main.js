@@ -12,11 +12,9 @@ cccccc
 cccccc
 `,
 `
-p p
- p 
-ppp
-pyp
- p 
+ pp p
+pypp
+ pp p
 `
 ];
 
@@ -90,6 +88,16 @@ let fishes;
  */
 const fishspeed = 0.2;
 
+/**
+ * @type { number }
+ */
+ const fishoffset = 10;
+
+/**
+ * @type { number }
+ */
+let counter = 0;
+
 function update() {
 	if (!ticks) {
 		// initialization
@@ -103,10 +111,13 @@ function update() {
             // isFiringLeft: true
         };
 		fish = {
-			pos: vec(G.WIDTH * 0.5, 0),
+			pos: vec(0, G.HEIGHT * 0.5 - fishoffset),
 		};
 		fishes = [];
 	}
+
+	counter++; // increment counter
+	counter = counter % 65;
 
 	if (player.isJumping) {
 		player.vy += 0.05;            // decrease upward velocity
@@ -146,9 +157,9 @@ function update() {
 
 	
 
-	if (fishes.length < 2) {
-		const posX = player.pos.x;
-		const posY = rnd(0, 20);
+	if (counter == 64) {
+		const posX = G.WIDTH;
+		const posY = (G.HEIGHT * 0.5) - fishoffset + rnd(0, 3);
 		fishes.push({ pos: vec(posX, posY) });
 	}
 	
@@ -159,13 +170,13 @@ function update() {
 
 	remove(fishes, (f) => {
 		// let thisFish = char("b", f.pos);    // draw fish
-		f.pos.y += fishspeed;               // move fish down
+		f.pos.x -= fishspeed;               // move fish 
 		
-		if (f.pos.y >= G.HEIGHT) {
-			end("Game over :("); // fish dropped
+		if (f.pos.x >= G.WIDTH) {
+			end("Game over :("); // fish escape
 		}
 
-		// if fish collides with player and player is jumping, todo
+		// if fish collides with player and player is jumping
 		const fishCollision = char("b", f.pos).isColliding.char.a;
 		if (fishCollision && player.isJumping) {
 			addScore(1); // add to score
