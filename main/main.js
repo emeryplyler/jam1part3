@@ -1,6 +1,6 @@
 title = "Planeshift";
 
-description = `Press to change dimensions`;
+description = `  Press to \n  change\n   dimensions`;
 
 characters = [
 `
@@ -120,7 +120,7 @@ function update() {
 
 	if (counter == 64) {
 		const posX = G.WIDTH;
-		const posY = (G.HEIGHT * 0.5) + rnd(0, 3);
+		const posY = (G.HEIGHT * 0.5 + 1);
 		blocks.push({ pos: vec(posX, posY) , color: blue});
 	}
 	
