@@ -1,10 +1,10 @@
-title = "Kitty";
+title = "Planeshift";
 
-description = `Kitty game`;
+description = `Press to change dimensions`;
 
 characters = [
 `
- c  c 
+c    c
 cccccc
 c cc c
 cccccc
@@ -12,9 +12,9 @@ cccccc
 cccccc
 `,
 `
- pp p
-pypp
- pp p
+pppp
+pppp
+pppp
 `
 ];
 
@@ -55,7 +55,7 @@ options = {
  * @typedef {{
  * pos: Vector,
  * speed: number,
- * isJumping: boolean,
+ * color: number,
  * vx: number,
  * vy: number,
  * }} Player
@@ -66,31 +66,30 @@ options = {
  */
 let player;
 
+let blue = 0; // type blue and red instead of 1 and 0
+let red = 1;
+
 /**
  * @typedef {{
  * pos: Vector,
- * }} Fish
+ * color: number,
+ * }} Block
  */
 
 /**
- * @type { Fish }
+ * @type { Block }
  */
-let fish;
+let block;
 
 /**
- * @type { Fish [] }
+ * @type { Block [] }
  */
-let fishes;
-
-/**
- * @type { number }
- */
-const fishspeed = 0.2;
+let blocks;
 
 /**
  * @type { number }
  */
- const fishoffset = 10;
+const blockspeed = 0.2; // can be changed to depend on difficulty
 
 /**
  * @type { number }
@@ -103,58 +102,45 @@ function update() {
 		player = {
             pos: vec(G.WIDTH * 0.5, G.HEIGHT * 0.5),
 			speed: 0,
-			isJumping: false,
+			color: blue,
 			vx: 0,
 			vy: 0,
         };
-		fish = {
-			pos: vec(0, G.HEIGHT * 0.5 - fishoffset),
+		block = {
+			pos: vec(0, G.HEIGHT * 0.5),
+			color: blue,
 		};
-		fishes = [];
+		blocks = [];
 	}
 
-	counter++; // increment counter
+	counter++; // increment counter for spawning blocks
 	counter = counter % 65;
 
-	if (player.isJumping) {
-		player.vy += 0.05;            // decrease upward velocity
-		player.pos.y += player.vy;    // move sprite
-		if (player.pos.y >= (G.HEIGHT * 0.5)) {
-			player.vy = 0;            // sprite has hit "ground"
-			player.pos.y = G.HEIGHT * 0.5;
-			player.isJumping = false; // reset
-		}
-	} else {
-		if (input.isJustPressed) {
-			player.vy = -1;           // initial upward velocity
-			player.isJumping = true;
-		}
-	}
+	
 
 	if (counter == 64) {
 		const posX = G.WIDTH;
-		const posY = (G.HEIGHT * 0.5) - fishoffset + rnd(0, 3);
-		fishes.push({ pos: vec(posX, posY) });
+		const posY = (G.HEIGHT * 0.5) + rnd(0, 3);
+		blocks.push({ pos: vec(posX, posY) , color: blue});
 	}
 	
-	// player.pos = vec(input.pos.x, input.pos.y);
 	player.pos.clamp(0, G.WIDTH, 0, G.HEIGHT);
-	char("a", player.pos);
+	char("a", player.pos); // draw player character
 
 
-	remove(fishes, (f) => {
-		f.pos.x -= fishspeed; // move fish 
-		
-		if (f.pos.x <= 0) {
-			end("Game over :("); // fish escape
-		}
+	remove(blocks, (b) => {
+		b.pos.x -= blockspeed; // move block 
 
-		// if fish collides with player and player is jumping
-		const fishCollision = char("b", f.pos).isColliding.char.a;
-		if (fishCollision && player.isJumping) {
-			addScore(1); // add to score
-			play("hit"); // sound effect
-
+		// if fish collides with player
+		const blockCollide = char("b", b.pos).isColliding.char.a;
+		if (blockCollide) {
+			if (b.color == player.color) {
+				addScore(1); // add to score
+				play("hit"); // sound effect
+			} else {
+				end("Game over"); // wrong color, end game
+			}
+			
 			color("purple"); // purple particles
 			particle(
 				player.pos.x,
@@ -166,7 +152,7 @@ function update() {
 			);
 			color("black"); // setting color to black means default colors
 
-			return true; // delete fish
+			return true; // delete block
 		} else {
 			return false;
 		}
